@@ -1,12 +1,12 @@
 public class GroceryItem {
     private String name;
-    private Float price;
+    private Double price;
     private String type;
     private String expiration;
 
     public GroceryItem() {}
 
-    public GroceryItem(String name, Float price, String type, String expiration) {
+    public GroceryItem(String name, Double price, String type, String expiration) {
         this.name = name;
         this.price = price;
         this.type = type;
@@ -21,11 +21,11 @@ public class GroceryItem {
         this.name = name;
     }
 
-    public Float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -47,7 +47,7 @@ public class GroceryItem {
 
     @Override
     public String toString() {
-        return "GroceryItem{" +
+        return "GroceryItem {" +
                 "name='" + name + '\'' +
                 ", price=" + price +
                 ", type='" + type + '\'' +
