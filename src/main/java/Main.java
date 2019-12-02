@@ -11,7 +11,11 @@ public class Main {
 
     public static void main(String[] args) throws Exception{
         String output = (new Main()).readRawDataToString();
-        System.out.println(output);
+//        System.out.println(output);
+        JerkSONParser jsonParser = new JerkSONParser(output);
+        String jsonParsedText = jsonParser.replaceFieldSeparators(jsonParser.replaceObjectSeparators());
+        System.out.println(jsonParsedText);
+
 
     }
 }
