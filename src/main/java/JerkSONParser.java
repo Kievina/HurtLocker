@@ -24,61 +24,44 @@ public class JerkSONParser {
         return groceryList;
     }
 
-    public String printReport1() {
+    public String printItemReport() {
         String result = "";
-        for (Map.Entry<String, Long> entry : mapItemCounts().entrySet()) {
-            result += entry.getKey() + " : " + entry.getValue() + '\n';
-        }
+        getPriceCountsOfItem().forEach((key, value) -> System.out.println(key + ":" + value));
         return result;
     }
 
-    public String printReport2(String itemName) {
+    public String printPriceReport() {
+        Map<String, Map<String, Long>> resultsMap = getPriceCountsOfItem();
         String result = "";
-//        if(getPriceCountsOfItem(itemName).entrySet().get(itemName).size() == 1) {
-//        for (Map.Entry<String, Map<String, Long>> entry : getPriceCountsOfItem(itemName).entrySet()) {
-//            result += "Price " + entry.getKey() + " : " + entry.getValue() + '\n';
-//        }
+        resultsMap.forEach((key, value) -> System.out.println(key + ":" + value));
+
         return result;
     }
 
-    private Map<String, Map<String, Long>> getPriceCountsOfItem(String itemName) {
+    public Map<String, Map<String, Long>> getPriceCountsOfItem() {
         Map<String, Map<String, Long>> linkedMap = new LinkedHashMap<>();
         Map<String, Long> map = new LinkedHashMap<>();
 
-//        List<String> allItemPrices = groceryList.stream().filter(item -> item.getName().equals(itemName))
-//                .map(item -> item.getPrice()).collect(Collectors.toList());
-//        Set<String> uniquePrices = new HashSet<>(allItemPrices);
-//        for (String uniquePrice : uniquePrices) {
-//            map.put(uniquePrice, allItemPrices.stream().filter(price -> price.equals(uniquePrice)).count());
-//        }
-//        linkedMap.put(itemName, map);
-        List<GroceryItem> cleanList = groceryList.stream().filter(item -> !item.getPrice().equals("type"))
-                .collect(Collectors.toList());
         linkedMap.put("Milk",
-                cleanList.stream().filter(x -> x.getName().equals("Milk"))
+                getCleanGroceryList().stream().filter(x -> x.getName().equals("Milk"))
                         .collect(Collectors.groupingBy(GroceryItem::getPrice, Collectors.counting())));
         linkedMap.put("Bread",
-                cleanList.stream().filter(x -> x.getName().equals("Bread"))
+                getCleanGroceryList().stream().filter(x -> x.getName().equals("Bread"))
                         .collect(Collectors.groupingBy(GroceryItem::getPrice, Collectors.counting())));
         linkedMap.put("Cookies",
-                cleanList.stream().filter(x -> x.getName().equals("Cookies"))
+                getCleanGroceryList().stream().filter(x -> x.getName().equals("Cookies"))
                         .collect(Collectors.groupingBy(GroceryItem::getPrice, Collectors.counting())));
         linkedMap.put("Apples",
-                cleanList.stream().filter(x -> x.getName().equals("Milk"))
+                getCleanGroceryList().stream().filter(x -> x.getName().equals("Apples"))
                         .collect(Collectors.groupingBy(GroceryItem::getPrice, Collectors.counting())));
         return linkedMap;
     }
 
 
-    private Map<String, Long> mapItemCounts() {
+    private List<GroceryItem> getCleanGroceryList() {
         List<GroceryItem> newList = groceryList.stream().filter(item -> !item.getPrice().equals("type"))
                 .collect(Collectors.toList());
-        Map<String, Long> map = new LinkedHashMap<>();
-        map.put("Milk", newList.stream().filter(item -> item.getName().equals("Milk")).count()); // 6 times - correct
-        map.put("Bread", newList.stream().filter(item -> item.getName().equals("Bread")).count()); // 6 times - correct
-        map.put("Cookies", newList.stream().filter(item -> item.getName().equals("Cookies")).count()); // 8 times - correct
-        map.put("Apples", newList.stream().filter(item -> item.getName().equals("Apples")).count()); // 4 times - correct
-        return map;
+        return newList;
     }
 
     public int getErrorCount() {

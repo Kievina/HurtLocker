@@ -27,13 +27,8 @@ public class Main {
 
 //        System.out.println(jerkSONParser.getItemCount());
 //        jerkSONParser.printGroceryList(list);
-
-        System.out.println(jerkSONParser.printReport1());
-        System.out.println(jerkSONParser.printReport2("Milk"));
-        System.out.println(jerkSONParser.printReport2("Bread"));
-        System.out.println(jerkSONParser.printReport2("Cookies"));
-        System.out.println(jerkSONParser.printReport2("Apples"));
-
-
+        jerkSONParser.getPriceCountsOfItem().values().stream()
+//        .forEach((key, value) -> System.out.println(key + ":" + value));
+                .forEach(value -> System.out.println("Item Name: " + value));
     }
 }
