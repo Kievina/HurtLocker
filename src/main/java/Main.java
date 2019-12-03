@@ -22,12 +22,18 @@ public class Main {
 
         List<GroceryItem> list = jerkSONParser.convertToGroceryItemList();
         jerkSONParser.printGroceryList(list);
-        //need to update expiration value in list to capture full date
 
         System.out.println(jerkSONParser.getErrorCount());
-        for (Map.Entry<String, Integer> entry : jerkSONParser.getNameCount().entrySet()) {
-            System.out.printf("name:    %s 		 seen: %s times\n", entry.getKey(), entry.getValue());
-        }
+
+//        System.out.println(jerkSONParser.getItemCount());
+//        jerkSONParser.printGroceryList(list);
+
+        System.out.println(jerkSONParser.printReport1());
+        System.out.println(jerkSONParser.printReport2("Milk"));
+        System.out.println(jerkSONParser.printReport2("Bread"));
+        System.out.println(jerkSONParser.printReport2("Cookies"));
+        System.out.println(jerkSONParser.printReport2("Apples"));
+
 
     }
 }

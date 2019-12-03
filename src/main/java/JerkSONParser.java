@@ -1,17 +1,18 @@
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class JerkSONParser {
     private List<GroceryItem> groceryList;
     private String rawData;
 
     public JerkSONParser() {
-        this.groceryList = new ArrayList<GroceryItem>();
+        this.groceryList = new ArrayList<>();
     }
 
     public JerkSONParser(String rawDataString) {
-        this.groceryList = new ArrayList<GroceryItem>();
+        this.groceryList = new ArrayList<>();
         this.rawData = rawDataString;
     }
 
@@ -23,47 +24,61 @@ public class JerkSONParser {
         return groceryList;
     }
 
-    public Map<String, Integer> getNameCount() {
-        int countApples = 0;
-        int countBread = 0;
-        int countCookies = 0;
-        int countMilk = 0;
-        Map<String, Integer> map = new HashMap<String, Integer>();
-
-        Pattern pApples = Pattern.compile("apple", Pattern.CASE_INSENSITIVE);
-        Pattern pBread = Pattern.compile("bread", Pattern.CASE_INSENSITIVE);
-        Pattern pCookies = Pattern.compile("c[o0][o0]kies", Pattern.CASE_INSENSITIVE);
-        Pattern pMilk = Pattern.compile("milk", Pattern.CASE_INSENSITIVE);
-
-        for (int i = 0; i < groceryList.size(); i++) {
-            Matcher m1 = pApples.matcher(groceryList.get(i).getName());
-            Matcher m2 = pBread.matcher(groceryList.get(i).getName());
-            Matcher m3 = pCookies.matcher(groceryList.get(i).getName());
-            Matcher m4 = pMilk.matcher(groceryList.get(i).getName());
-
-
-            while (m1.find())
-                countApples++;
-            while (m2.find())
-                countBread++;
-            while (m3.find())
-                countCookies++;
-            while (m4.find())
-                countMilk++;
+    public String printReport1() {
+        String result = "";
+        for (Map.Entry<String, Long> entry : mapItemCounts().entrySet()) {
+            result += entry.getKey() + " : " + entry.getValue() + '\n';
         }
-
-        map.put("Milk", countMilk);
-        map.put("Bread", countBread);
-        map.put("Cookies", countCookies);
-        map.put("Apples", countApples);
-
-
-        return map;
+        return result;
     }
 
-    private int getPriceCount() {
+    public String printReport2(String itemName) {
+        String result = "";
+//        if(getPriceCountsOfItem(itemName).entrySet().get(itemName).size() == 1) {
+//        for (Map.Entry<String, Map<String, Long>> entry : getPriceCountsOfItem(itemName).entrySet()) {
+//            result += "Price " + entry.getKey() + " : " + entry.getValue() + '\n';
+//        }
+        return result;
+    }
 
-        return 0;
+    private Map<String, Map<String, Long>> getPriceCountsOfItem(String itemName) {
+        Map<String, Map<String, Long>> linkedMap = new LinkedHashMap<>();
+        Map<String, Long> map = new LinkedHashMap<>();
+
+//        List<String> allItemPrices = groceryList.stream().filter(item -> item.getName().equals(itemName))
+//                .map(item -> item.getPrice()).collect(Collectors.toList());
+//        Set<String> uniquePrices = new HashSet<>(allItemPrices);
+//        for (String uniquePrice : uniquePrices) {
+//            map.put(uniquePrice, allItemPrices.stream().filter(price -> price.equals(uniquePrice)).count());
+//        }
+//        linkedMap.put(itemName, map);
+        List<GroceryItem> cleanList = groceryList.stream().filter(item -> !item.getPrice().equals("type"))
+                .collect(Collectors.toList());
+        linkedMap.put("Milk",
+                cleanList.stream().filter(x -> x.getName().equals("Milk"))
+                        .collect(Collectors.groupingBy(GroceryItem::getPrice, Collectors.counting())));
+        linkedMap.put("Bread",
+                cleanList.stream().filter(x -> x.getName().equals("Bread"))
+                        .collect(Collectors.groupingBy(GroceryItem::getPrice, Collectors.counting())));
+        linkedMap.put("Cookies",
+                cleanList.stream().filter(x -> x.getName().equals("Cookies"))
+                        .collect(Collectors.groupingBy(GroceryItem::getPrice, Collectors.counting())));
+        linkedMap.put("Apples",
+                cleanList.stream().filter(x -> x.getName().equals("Milk"))
+                        .collect(Collectors.groupingBy(GroceryItem::getPrice, Collectors.counting())));
+        return linkedMap;
+    }
+
+
+    private Map<String, Long> mapItemCounts() {
+        List<GroceryItem> newList = groceryList.stream().filter(item -> !item.getPrice().equals("type"))
+                .collect(Collectors.toList());
+        Map<String, Long> map = new LinkedHashMap<>();
+        map.put("Milk", newList.stream().filter(item -> item.getName().equals("Milk")).count()); // 6 times - correct
+        map.put("Bread", newList.stream().filter(item -> item.getName().equals("Bread")).count()); // 6 times - correct
+        map.put("Cookies", newList.stream().filter(item -> item.getName().equals("Cookies")).count()); // 8 times - correct
+        map.put("Apples", newList.stream().filter(item -> item.getName().equals("Apples")).count()); // 4 times - correct
+        return map;
     }
 
     public int getErrorCount() {
@@ -80,24 +95,13 @@ public class JerkSONParser {
     }
 
     public List<GroceryItem> convertToGroceryItemList() {
-        String objName;
-        String objPrice;
-        String objType;
-        String objExp;
         List<String> itemsAsString = getItemStrings();
-
         for (String itemString : itemsAsString) {
-            objName = findName(itemString);             // get name
-            objPrice = findPrice(itemString);           // get price
-            objType = findType(itemString);             // get type
-            objExp = findExpiration(itemString);        // get expiration
-
-            // create new GroceryItem
-            GroceryItem newItem = new GroceryItem(objName, objPrice, objType, objExp);
-
-            // add GroceryItem to list
-            groceryList.add(newItem);
+            // create new GroceryItem and add to list
+            groceryList.add(new GroceryItem(findName(itemString), findPrice(itemString),
+                    findType(itemString), findExpiration(itemString)));
         }
+        replaceNames();
         return groceryList;
     }
 
@@ -105,6 +109,61 @@ public class JerkSONParser {
         Pattern p = Pattern.compile("##");
         String[] splitString = p.split(replaceFieldSeparators());
         return Arrays.asList(splitString);
+    }
+
+    private String replaceFieldSeparators() {
+        String originalText = rawData;
+        Pattern pFieldSeparator1 = Pattern.compile("name.", Pattern.CASE_INSENSITIVE);
+        Pattern pFieldSeparator2 = Pattern.compile(".price.", Pattern.CASE_INSENSITIVE);
+        Pattern pFieldSeparator3 = Pattern.compile(".type.", Pattern.CASE_INSENSITIVE);
+        Pattern pFieldSeparator4 = Pattern.compile(".expiration.", Pattern.CASE_INSENSITIVE);
+
+        Matcher mFieldSeparator1 = pFieldSeparator1.matcher(originalText);
+        String field1Corrected = mFieldSeparator1.replaceAll("name:");
+
+        Matcher mFieldSeparator2 = pFieldSeparator2.matcher(field1Corrected);
+        String field2Corrected = mFieldSeparator2.replaceAll(";price:");
+
+        Matcher mFieldSeparator3 = pFieldSeparator3.matcher(field2Corrected);
+        String field3Corrected = mFieldSeparator3.replaceAll(";type:");
+
+        Matcher mFieldSeparator4 = pFieldSeparator4.matcher(field3Corrected);
+        return mFieldSeparator4.replaceAll(";expiration:");
+    }
+
+    private void replaceNames() {
+        for (int i = 0; i < groceryList.size(); i++) {
+            if (appleMatcher(groceryList.get(i).getName()).find())
+                groceryList.get(i).setName("Apples");
+            else if (breadMatcher(groceryList.get(i).getName()).find())
+                groceryList.get(i).setName("Bread");
+            else if (cookieMatcher(groceryList.get(i).getName()).find())
+                groceryList.get(i).setName("Cookies");
+            else if (milkMatcher(groceryList.get(i).getName()).find())
+                groceryList.get(i).setName("Milk");
+            else
+                groceryList.get(i).setName("price");
+        }
+    }
+
+    private Matcher appleMatcher(String text) {
+        Pattern pApples = Pattern.compile("apples", Pattern.CASE_INSENSITIVE);
+        return pApples.matcher(text);
+    }
+
+    private Matcher breadMatcher(String text) {
+        Pattern pBread = Pattern.compile("bread", Pattern.CASE_INSENSITIVE);
+        return pBread.matcher(text);
+    }
+
+    private Matcher cookieMatcher(String text) {
+        Pattern pCookies = Pattern.compile("c[o0][o0]kies", Pattern.CASE_INSENSITIVE);
+        return pCookies.matcher(text);
+    }
+
+    private Matcher milkMatcher(String text) {
+        Pattern pMilk = Pattern.compile("milk", Pattern.CASE_INSENSITIVE);
+        return pMilk.matcher(text);
     }
 
     private String findName(String text) {
@@ -135,32 +194,12 @@ public class JerkSONParser {
     }
 
     private String findExpiration(String itemText) {
-        Pattern expValue = Pattern.compile("expiration\\W+(\\w+)", Pattern.CASE_INSENSITIVE);
+        Pattern expValue = Pattern.compile("expiration:(\\d+/\\d+/\\d+)", Pattern.CASE_INSENSITIVE);
         Matcher m = expValue.matcher(itemText);
         if (m.find())
             return m.group(1);
         else
             return "";
-    }
-
-    public String replaceFieldSeparators() {
-        String originalText = rawData;
-        Pattern pFieldSeparator1 = Pattern.compile("name.", Pattern.CASE_INSENSITIVE);
-        Pattern pFieldSeparator2 = Pattern.compile(".price.", Pattern.CASE_INSENSITIVE);
-        Pattern pFieldSeparator3 = Pattern.compile(".type.", Pattern.CASE_INSENSITIVE);
-        Pattern pFieldSeparator4 = Pattern.compile(".expiration.", Pattern.CASE_INSENSITIVE);
-
-        Matcher mFieldSeparator1 = pFieldSeparator1.matcher(originalText);
-        String field1Corrected = mFieldSeparator1.replaceAll("name:");
-
-        Matcher mFieldSeparator2 = pFieldSeparator2.matcher(field1Corrected);
-        String field2Corrected = mFieldSeparator2.replaceAll(";price:");
-
-        Matcher mFieldSeparator3 = pFieldSeparator3.matcher(field2Corrected);
-        String field3Corrected = mFieldSeparator3.replaceAll(";type:");
-
-        Matcher mFieldSeparator4 = pFieldSeparator4.matcher(field3Corrected);
-        return mFieldSeparator4.replaceAll(";expiration:");
     }
 
     public void printGroceryList(List<GroceryItem> itemList) {
