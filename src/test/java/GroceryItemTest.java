@@ -18,10 +18,10 @@ public class GroceryItemTest {
     @Test
     public void groceryItemConstructorTest() {
         String expectedName = "milk";
-        Double expectedPrice = 2.50d;
+        String expectedPrice = "2.50";
         String expectedType = "food";
         String expectedExpiration = "12/25/2019";
-        GroceryItem groceryItem = new GroceryItem("milk", 2.50d, "food", "12/25/2019");
+        GroceryItem groceryItem = new GroceryItem("milk", "2.50", "food", "12/25/2019");
 
         Assert.assertEquals(expectedName, groceryItem.getName());
         Assert.assertEquals(expectedPrice, groceryItem.getPrice());
@@ -48,7 +48,7 @@ public class GroceryItemTest {
 
     @Test
     public void setPriceTest() {
-        Double expectedPrice = 2.50d;
+        String expectedPrice = "2.50";
         GroceryItem groceryItem = new GroceryItem();
 
         groceryItem.setPrice(expectedPrice);
@@ -86,7 +86,7 @@ public class GroceryItemTest {
 
     @Test
     public void toStringTest() {
-        GroceryItem groceryItem = new GroceryItem("milk", 2.50d, "food", "12/25/2019");
+        GroceryItem groceryItem = new GroceryItem("milk", "2.50", "food", "12/25/2019");
         String expectedOutput = "GroceryItem {name='milk', price=2.5, type='food', expiration='12/25/2019'}";
         Assert.assertEquals(expectedOutput, groceryItem.toString());
 //        System.out.println(groceryItem.toString());
